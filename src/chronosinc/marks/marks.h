@@ -30,7 +30,9 @@
 #define CHRONOS_INTINCLUDES_MARK_EVENTS_H_
 
 #include "../../chronosinc/marks/Hourly.h"
+#include "../../chronosinc/marks/EveryXHours.h"
 #include "../../chronosinc/marks/Daily.h"
+#include "../../chronosinc/marks/EveryXDays.h"
 #include "../../chronosinc/marks/Weekly.h"
 #include "../../chronosinc/marks/Monthly.h"
 #include "../../chronosinc/marks/Yearly.h"

@@ -39,6 +39,7 @@ typedef uint8_t Minutes;
 typedef uint8_t Hours;
 typedef uint8_t WeekDay;
 typedef uint8_t Day;
+typedef uint8_t Days;
 typedef uint8_t Month;
 typedef uint16_t Year;
 
