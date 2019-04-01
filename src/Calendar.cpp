@@ -26,33 +26,31 @@
 #include "chronosinc/schedule/Calendar.h"
 #include "chronosinc/platform/platform.h"
 #include "chronosinc/Sort.h"
-namespace Chronos {
+namespace Chronos
+{
 
-
-Calendar::Calendar(uint8_t maxEvents) : num_events(0), max_events(maxEvents), num_recurring(0){
-
-
+Calendar::Calendar(uint8_t maxEvents) : num_events(0), max_events(maxEvents), num_recurring(0)
+{
 }
 
-void Calendar::clear() {
+void Calendar::clear()
+{
 
-	if (! num_events)
+	if (!num_events)
 		return;
 
 	CHRONOS_DEBUG_OUTLN("Clearing all calendar events.");
 	Chronos::Event emptyEvent;
-	for (uint8_t i=0; i< num_events; i++)
+	for (uint8_t i = 0; i < num_events; i++)
 	{
-		Chronos::Event * evt = this->eventSlot(i);
+		Chronos::Event *evt = this->eventSlot(i);
 		if (evt)
 		{
 			*evt = emptyEvent;
 		}
-
 	}
 	num_events = 0;
 	num_recurring = 0;
-
 }
 bool Calendar::remove(EventID evId)
 {
@@ -62,9 +60,9 @@ bool Calendar::remove(EventID evId)
 	if (evId <= EVENTID_NOTSET)
 		return false;
 
-	for (pos=0; pos<num_events; pos++)
+	for (pos = 0; pos < num_events; pos++)
 	{
-		Chronos::Event * evt = this->eventSlot(pos);
+		Chronos::Event *evt = this->eventSlot(pos);
 		if (evt && evt->id() == evId)
 		{
 			evt->reset();
@@ -73,34 +71,45 @@ bool Calendar::remove(EventID evId)
 		}
 	}
 
-	if (! foundIt)
+	if (!foundIt)
 		return false;
 
-	if (pos < (num_events - 1)) {
+	if (pos < (num_events - 1))
+	{
 		// need to shift others back
-		for (uint8_t i = pos; i < (num_events - 1); i++) {
-			Chronos::Event * emptySlot = this->eventSlot(i);
-			Chronos::Event * slotToMove = this->eventSlot(i + 1);
+		for (uint8_t i = pos; i < (num_events - 1); i++)
+		{
+			Chronos::Event *emptySlot = this->eventSlot(i);
+			Chronos::Event *slotToMove = this->eventSlot(i + 1);
 
-			if (emptySlot && slotToMove) {
+			if (emptySlot && slotToMove)
+			{
 				*emptySlot = *slotToMove;
 				slotToMove->reset();
 			}
 		}
-
 	}
 	// no matter what, we now have one less...
 	num_events--;
 
-
 	return foundIt;
 }
-bool Calendar::add(const Chronos::Event & event)
+
+void Calendar::removeAll(EventID evId)
+{
+	bool foundIt = true;
+	do
+	{
+		foundIt = this->remove(evId);
+	} while (foundIt);
+}
+
+bool Calendar::add(const Chronos::Event &event)
 {
 	if (num_events >= max_events)
 		return false;
 
-	Chronos::Event * evt = this->eventSlot(num_events);
+	Chronos::Event *evt = this->eventSlot(num_events);
 
 	if (NULL == evt)
 		return false;
@@ -109,7 +118,6 @@ bool Calendar::add(const Chronos::Event & event)
 	if (event.isRecurring())
 	{
 		num_recurring++;
-
 	}
 
 	CHRONOS_DEBUG_OUT("Assigning event ");
@@ -121,19 +129,16 @@ bool Calendar::add(const Chronos::Event & event)
 	*evt = event;
 
 	return true;
-
-
 }
 
-
 #ifdef PLATFORM_SUPPORTS_RVAL_MOVE
-bool Calendar::add(Chronos::Event&& event)
+bool Calendar::add(Chronos::Event &&event)
 {
 
 	if (num_events >= max_events)
 		return false;
 
-	Chronos::Event * evt = this->eventSlot(num_events);
+	Chronos::Event *evt = this->eventSlot(num_events);
 
 	if (NULL == evt)
 		return false;
@@ -142,7 +147,6 @@ bool Calendar::add(Chronos::Event&& event)
 	if (event.isRecurring())
 	{
 		num_recurring++;
-
 	}
 	CHRONOS_DEBUG_OUT("Moving event ");
 	CHRONOS_DEBUG_OUTHEX(&event);
@@ -150,34 +154,33 @@ bool Calendar::add(Chronos::Event&& event)
 	CHRONOS_DEBUG_OUTINT(num_events);
 	CHRONOS_DEBUG_OUTLN("!");
 
-
 	*evt = event;
 
 	return true;
 }
 #endif
 
-uint8_t Calendar::listNext(uint8_t number, Event::Occurrence into[], const DateTime & dt)
+uint8_t Calendar::listNext(uint8_t number, Event::Occurrence into[], const DateTime &dt)
 {
-	uint8_t ev=0;
+	uint8_t ev = 0;
 	uint8_t addedIdx = 0;
 
 	{
 		Chronos::DateTime farFuture(Chronos::DateTime::endOfTime());
 		Event::Occurrence dummy(EVENTID_NOTSET, farFuture, farFuture);
-		for (uint8_t i=0; i<number;i++)
-			into[i]=dummy;
+		for (uint8_t i = 0; i < number; i++)
+			into[i] = dummy;
 	}
 
 	while (ev < num_events)
 	{
 
-		Chronos::Event * evt = this->eventSlot(ev++);
+		Chronos::Event *evt = this->eventSlot(ev++);
 
 		if (NULL == evt)
 			continue;
 
-		if (! evt->hasNext(dt))
+		if (!evt->hasNext(dt))
 		{
 			continue;
 		}
@@ -186,11 +189,11 @@ uint8_t Calendar::listNext(uint8_t number, Event::Occurrence into[], const DateT
 		bool didInsert = false;
 
 		DateTime recStartDt(dt);
-		for (uint8_t addNum=0; addNum<maxNumToAdd; addNum++ )
+		for (uint8_t addNum = 0; addNum < maxNumToAdd; addNum++)
 		{
 
 			Event::Occurrence occ(evt->nextOccurrence(recStartDt));
-			for (int16_t i=number; i>=0; i--)
+			for (int16_t i = number; i >= 0; i--)
 			{
 
 				if (occ.start < into[i].start)
@@ -198,8 +201,7 @@ uint8_t Calendar::listNext(uint8_t number, Event::Occurrence into[], const DateT
 					// ok, this event bumps one from our return array,
 					// we place it at the end of the array, as we know
 					// that guy'll be bumped out
-					into[number-1] = occ;
-
+					into[number - 1] = occ;
 
 					// now we have a mostly-sorted array where all elements
 					// are <= to the ones to their right, except (possibly)
@@ -215,16 +217,14 @@ uint8_t Calendar::listNext(uint8_t number, Event::Occurrence into[], const DateT
 				}
 			}
 
-			if (! didInsert)
+			if (!didInsert)
 			{
 				// all future occurrences won't fit either
 				break;
 			}
 
 			recStartDt = occ.start + Chronos::Span::Seconds(1);
-
 		}
-
 	}
 
 	while (addedIdx < number)
@@ -234,21 +234,18 @@ uint8_t Calendar::listNext(uint8_t number, Event::Occurrence into[], const DateT
 			break;
 		}
 
-
 		addedIdx++;
 	}
 	return addedIdx;
-
-
 }
-bool Calendar::nextDateTimeOfInterest(const DateTime & fromDT, DateTime & returnDT)
+bool Calendar::nextDateTimeOfInterest(const DateTime &fromDT, DateTime &returnDT)
 {
 
-	if (! num_events)
+	if (!num_events)
 		return false;
 
-	Event::Occurrence * eventOccs = new Event::Occurrence[max_events];
-	if (! eventOccs)
+	Event::Occurrence *eventOccs = new Event::Occurrence[max_events];
+	if (!eventOccs)
 	{
 		CHRONOS_DEBUG_OUTLN("nextDateTimeOfInterest: Couldn't allocate space for ongoing list?");
 		return false;
@@ -257,9 +254,8 @@ bool Calendar::nextDateTimeOfInterest(const DateTime & fromDT, DateTime & return
 	returnDT = DateTime::endOfTime(); // arbitrary far future date
 	uint8_t numOngoing = listOngoing(max_events, eventOccs, fromDT);
 
-
 	bool foundSomething = false;
-	for (uint8_t i=0; i<numOngoing; i++)
+	for (uint8_t i = 0; i < numOngoing; i++)
 	{
 		// these are on-going, so happening right now... we keep the end datetimes
 		if (eventOccs[i].finish < returnDT)
@@ -270,11 +266,9 @@ bool Calendar::nextDateTimeOfInterest(const DateTime & fromDT, DateTime & return
 		}
 	}
 
-
 	uint8_t numNext = listNext(max_events, eventOccs, fromDT);
 
-
-	for (uint8_t i=0; i<numNext; i++)
+	for (uint8_t i = 0; i < numNext; i++)
 	{
 		// there are coming up, we keep the start datetimes which are in the future
 		if (eventOccs[i].start < returnDT)
@@ -285,7 +279,7 @@ bool Calendar::nextDateTimeOfInterest(const DateTime & fromDT, DateTime & return
 		}
 	}
 
-	delete [] eventOccs;
+	delete[] eventOccs;
 	return foundSomething;
 
 #if 0
@@ -354,19 +348,16 @@ bool Calendar::nextDateTimeOfInterest(const DateTime & fromDT, DateTime & return
 
 	return true;
 #endif
-
-
 }
-uint8_t Calendar::listOngoing(uint8_t number, Event::Occurrence into[], const DateTime & dt)
+uint8_t Calendar::listOngoing(uint8_t number, Event::Occurrence into[], const DateTime &dt)
 {
 
-	uint8_t ev=0;
+	uint8_t ev = 0;
 	uint8_t addedIdx = 0;
-	while (ev<num_events && addedIdx < number)
+	while (ev < num_events && addedIdx < number)
 	{
 
-
-		Chronos::Event * evt = this->eventSlot(ev++);
+		Chronos::Event *evt = this->eventSlot(ev++);
 
 		if (NULL == evt)
 			continue;
@@ -376,14 +367,13 @@ uint8_t Calendar::listOngoing(uint8_t number, Event::Occurrence into[], const Da
 		{
 			into[addedIdx++] = occ;
 		}
-
 	}
 
 	Chronos::Sort::bubble(into, addedIdx);
 	return addedIdx;
 }
 
-uint8_t Calendar::listForDay(uint8_t maxNumber, Event::Occurrence intoArray[], const DateTime & dt)
+uint8_t Calendar::listForDay(uint8_t maxNumber, Event::Occurrence intoArray[], const DateTime &dt)
 {
 	DateTime startOfDay = dt.startOfDay();
 	DateTime justBeforeDayStart = startOfDay - Chronos::Span::Seconds(1);
@@ -395,10 +385,9 @@ uint8_t Calendar::listForDay(uint8_t maxNumber, Event::Occurrence intoArray[], c
 	}
 	*/
 
-
 	uint8_t numNext = listNext(maxNumber, intoArray, justBeforeDayStart);
 	uint8_t numFound = 0;
-	for (uint8_t i=0; i< numNext; i++)
+	for (uint8_t i = 0; i < numNext; i++)
 	{
 
 		if (intoArray[i].start.sameDateAs(startOfDay))
@@ -408,7 +397,6 @@ uint8_t Calendar::listForDay(uint8_t maxNumber, Event::Occurrence intoArray[], c
 	}
 
 	return numFound;
-
 }
 
 } /* namespace Chronos */

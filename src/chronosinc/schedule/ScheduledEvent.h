@@ -200,7 +200,7 @@ public:
 	 *
 	 * @return: EventID specified during construction.
 	 */
-	EventID id() { return event_id;}
+	EventID id() const { return event_id;}
 
 	/*
 	 * isRecurring()

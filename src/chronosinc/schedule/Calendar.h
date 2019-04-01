@@ -89,6 +89,12 @@ public:
 	bool remove(EventID evId);
 
 	/*
+	 * remove -- remove an all events from the calendar by event id
+	 * @param eventId: the EventID to search for
+	 */
+	void removeAll(EventID evId);
+
+	/*
 	 * add(event) -- add an event to the calendar.
 	 * @param event: the Chronos::Event to add
 	 * @return success: returns true if there was enough room in the calendar for this event.
