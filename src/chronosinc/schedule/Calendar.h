@@ -90,6 +90,8 @@ public:
 	
 	void setEnabled(EventID evId, bool enabled);
 
+	bool isEnabled(EventID evId);
+
 	/*
 	 * remove -- remove an all events from the calendar by event id
 	 * @param eventId: the EventID to search for

@@ -114,6 +114,26 @@ void Calendar::setEnabled(EventID evId, bool enabled)
 	}
 }
 
+bool Calendar::isEnabled(EventID evId)
+{
+	uint8_t pos;
+
+	if (evId <= EVENTID_NOTSET)
+		return false;
+
+	for (pos = 0; pos < num_events; pos++)
+	{
+		Chronos::Event *evt = this->eventSlot(pos);
+		if (evt && evt->id() == evId)
+		{
+			return evt->isEnabled();
+			break;
+		}
+	}
+
+	return false;
+}
+
 void Calendar::removeAll(EventID evId)
 {
 	bool foundIt = true;
