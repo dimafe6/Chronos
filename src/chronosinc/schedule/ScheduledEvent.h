@@ -160,7 +160,7 @@ public:
 	 * @param start: DateTime at which event begins
 	 * @param end: DateTime at which event ends
 	 */
-	Event(Chronos::EventID id, const DateTime & start, const DateTime & end, const Chronos::Zones & _zones);
+	Event(Chronos::EventID id, const DateTime & start, const DateTime & end, const Chronos::Zones & _zones, bool enabled = true);
 
 	/*
 	 * Chronos::Event(id, start, duration)
@@ -170,7 +170,7 @@ public:
 	 * @param duration: a Chronos::Span to set how long it lasts, e.g. Chronos::Span::Minutes(30)
 	 *
 	 */
-	Event(EventID id, const DateTime & start, const Chronos::Span::Delta & duration, const Chronos::Zones & _zones);
+	Event(EventID id, const DateTime & start, const Chronos::Span::Delta & duration, const Chronos::Zones & _zones, bool enabled = true);
 
 	/*
 	 * Chronos::Event(id, mark, duration)
@@ -179,12 +179,12 @@ public:
 	 * @param mark: a time mark for the event start, e.g. Chronos::Mark::Weekly(Chronos::Weekday::Monday)
 	 * @parma duration: a Chronos::Span to set how long it lasts, e.g. Chronos::Span::Hours(2)
 	 */
-	Event(EventID id, const Chronos::Mark::Event & timeEvent, const Chronos::Span::Delta & duration, const Chronos::Zones & _zones);
+	Event(EventID id, const Chronos::Mark::Event & timeEvent, const Chronos::Span::Delta & duration, const Chronos::Zones & _zones, bool enabled = true);
 
 #ifdef PLATFORM_SUPPORTS_RVAL_MOVE
-	Event(EventID id, const Chronos::Mark::Event & timeEvent, Chronos::Span::Delta && duration, const Chronos::Zones && _zones);
-	Event(Chronos::EventID id, DateTime && start, DateTime && end, const Chronos::Zones & _zones);
-	Event(EventID id, DateTime && start, Chronos::Span::Delta && duration, const Chronos::Zones & _zones);
+	Event(EventID id, const Chronos::Mark::Event & timeEvent, Chronos::Span::Delta && duration, const Chronos::Zones && _zones, bool enabled = true);
+	Event(Chronos::EventID id, DateTime && start, DateTime && end, const Chronos::Zones & _zones, bool enabled = true);
+	Event(EventID id, DateTime && start, Chronos::Span::Delta && duration, const Chronos::Zones & _zones, bool enabled = true);
 
 	Event(Event&& rhs);
 	Event & operator=(Event&& rhs);
@@ -220,6 +220,19 @@ public:
 	 */
 	bool isRecurring() const { return is_recurring; }
 
+	/*
+	 * isEnabled()
+	 *
+	 * @return: boolean true if the event is enabled
+	 */
+	bool isEnabled() const { return is_enabled; }
+
+	void setEnabled(bool enabled) { is_enabled = enabled; }
+
+	/*
+	 * getZones()
+	 * @return Chronos::Zones struct
+	 */
 	Chronos::Zones getZones() const { return zones; }
 
 	/*
@@ -272,8 +285,7 @@ private:
 	DateTime dt_start;
 	DateTime dt_end;
 	Chronos::Zones zones;
-
-
+	bool is_enabled = true;
 };
 
 } /* namespace Chronos */

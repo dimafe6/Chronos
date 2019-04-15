@@ -40,70 +40,76 @@ duration(0)
 
 }
 
-Event::Event(EventID evId, const Chronos::Mark::Event & timeEvent, const Chronos::Span::Delta & evtDuration, const Chronos::Zones& _zones):
+Event::Event(EventID evId, const Chronos::Mark::Event & timeEvent, const Chronos::Span::Delta & evtDuration, const Chronos::Zones& _zones, bool enabled):
 		event_id(evId),
 		is_recurring(true),
 		t_event(NULL),
 		duration(evtDuration),
-		zones(_zones)
+		zones(_zones),
+		is_enabled(enabled)
 {
 	t_event = timeEvent.clone();
 }
 
 
 
-Event::Event(EventID evId, const DateTime& start, const DateTime& end, const Chronos::Zones& _zones) :
+Event::Event(EventID evId, const DateTime& start, const DateTime& end, const Chronos::Zones& _zones, bool enabled) :
 		event_id(evId),
 		is_recurring(false),
 		t_event(NULL),
 		duration(0),
 		dt_start(start),
 		dt_end(end),
-		zones(_zones)
+		zones(_zones),
+		is_enabled(enabled)
 {
 
 }
 
 Event::Event(EventID evId, const DateTime& start,
-		const Chronos::Span::Delta& evtDuration, const Chronos::Zones& _zones) :
+		const Chronos::Span::Delta& evtDuration, const Chronos::Zones& _zones, bool enabled) :
 		event_id(evId),
 		is_recurring(false),
 		t_event(NULL),
 		duration(evtDuration),
 		dt_start(start),
 		dt_end(start + evtDuration),
-		zones(_zones)
+		zones(_zones),
+		is_enabled(enabled)
 {
 
 }
 
 #ifdef PLATFORM_SUPPORTS_RVAL_MOVE
-Event::Event(EventID evId, const Chronos::Mark::Event & timeEvent, Chronos::Span::Delta && evtDuration, const Chronos::Zones && _zones) :
+Event::Event(EventID evId, const Chronos::Mark::Event & timeEvent, Chronos::Span::Delta && evtDuration, const Chronos::Zones && _zones, bool enabled) :
 				event_id(evId),
 				is_recurring(true),
 				duration(std::move(evtDuration)),
-				zones(_zones)
+				zones(_zones),
+				is_enabled(enabled)
 {
 		t_event = timeEvent.clone();
 }
-Event::Event(Chronos::EventID evId, DateTime && start, DateTime && end, const Chronos::Zones& _zones) :
+Event::Event(Chronos::EventID evId, DateTime && start, DateTime && end, const Chronos::Zones& _zones, bool enabled) :
 	event_id(evId),
 	is_recurring(false),
 	t_event(NULL),
 	duration(0),
 	dt_start(std::move(start)),
 	dt_end(std::move(end)),
-	zones(_zones)
+	zones(_zones),
+	is_enabled(enabled)
 {
 }
-Event::Event(EventID evId, DateTime && start, Chronos::Span::Delta && evtDuration, const Chronos::Zones& _zones) :
+Event::Event(EventID evId, DateTime && start, Chronos::Span::Delta && evtDuration, const Chronos::Zones& _zones, bool enabled) :
 	event_id(evId),
 	is_recurring(false),
 	t_event(NULL),
 	duration(std::move(evtDuration)),
 	dt_start(std::move(start)),
 	dt_end(std::move(start + duration)),
-	zones(_zones)
+	zones(_zones),
+	is_enabled(enabled)
 {
 
 
@@ -117,7 +123,8 @@ Event::Event(Event&& other) :
 		duration(std::move(other.duration)),
 		dt_start(std::move(other.dt_start)),
 		dt_end(std::move(other.dt_end)),
-		zones(std::move(other.zones))
+		zones(std::move(other.zones)),
+		is_enabled(std::move(other.is_enabled))
 {
 	// we've taken ownership of the rvalue's event pointer
 	other.t_event = NULL;  // prevent it from being released in rvalue's d'tor
@@ -132,6 +139,7 @@ Event & Event::operator=(Event&& other)
 	dt_start = std::move(other.dt_start);
 	dt_end = std::move(other.dt_end);
 	zones = std::move(other.zones);
+	is_enabled = std::move(other.is_enabled);
 
 	if (t_event)
 	{
@@ -160,7 +168,8 @@ Event::Event(const Event & other) :
 		duration(other.duration),
 		dt_start(other.dt_start),
 		dt_end(other.dt_end),
-		zones(other.zones)
+		zones(other.zones),
+		is_enabled(other.is_enabled)
 {
 	if (NULL != other.t_event)
 	{
@@ -177,6 +186,7 @@ Event & Event::operator=(const Event & other)
 	dt_start = other.dt_start;
 	dt_end = other.dt_end;
 	zones = other.zones;
+	is_enabled = other.is_enabled;
 
 	/* ???
 	if (NULL != t_event)
@@ -222,6 +232,10 @@ void Event::reset()
 
 bool Event::hasNext(const DateTime & fromDateTime) {
 
+	if(!is_enabled) {
+		return false;
+	}
+
 	if (! is_recurring)
 	{
 		// a one time event
@@ -242,6 +256,10 @@ bool Event::hasNext(const DateTime & fromDateTime) {
 }
 Event::Occurrence Event::nextOccurrence(const DateTime & fromDateTime) {
 
+	if(!is_enabled) {
+		return Event::Occurrence();
+	}
+	
 	if (! is_recurring)
 	{
 			// a one time event
@@ -275,7 +293,10 @@ Event::Occurrence Event::nextOccurrence(const DateTime & fromDateTime) {
 }
 Event::Occurrence Event::closestOccurrence(const DateTime & fromDateTime)
 {
-
+	if(!is_enabled) {
+		return Event::Occurrence();
+	}
+	
 	if (! is_recurring)
 	{
 		// a one time event, the closest is the only occurrence

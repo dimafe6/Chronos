@@ -87,6 +87,8 @@ public:
 	 * @return success: event was found and removed
 	 */
 	bool remove(EventID evId);
+	
+	void setEnabled(EventID evId, bool enabled);
 
 	/*
 	 * remove -- remove an all events from the calendar by event id

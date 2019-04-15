@@ -52,6 +52,7 @@ void Calendar::clear()
 	num_events = 0;
 	num_recurring = 0;
 }
+
 bool Calendar::remove(EventID evId)
 {
 	bool foundIt = false;
@@ -93,6 +94,24 @@ bool Calendar::remove(EventID evId)
 	num_events--;
 
 	return foundIt;
+}
+
+void Calendar::setEnabled(EventID evId, bool enabled)
+{
+	uint8_t pos;
+
+	if (evId <= EVENTID_NOTSET)
+		return;
+
+	for (pos = 0; pos < num_events; pos++)
+	{
+		Chronos::Event *evt = this->eventSlot(pos);
+		if (evt && evt->id() == evId)
+		{
+			evt->setEnabled(enabled);
+			break;
+		}
+	}
 }
 
 void Calendar::removeAll(EventID evId)
