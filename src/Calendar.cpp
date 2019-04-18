@@ -56,6 +56,7 @@ void Calendar::clear()
 bool Calendar::remove(EventID evId)
 {
 	bool foundIt = false;
+	bool isRecurring = false;
 	uint8_t pos;
 
 	if (evId <= EVENTID_NOTSET)
@@ -66,6 +67,7 @@ bool Calendar::remove(EventID evId)
 		Chronos::Event *evt = this->eventSlot(pos);
 		if (evt && evt->id() == evId)
 		{
+			isRecurring = evt->isRecurring();
 			evt->reset();
 			foundIt = true;
 			break;
@@ -84,7 +86,7 @@ bool Calendar::remove(EventID evId)
 			Chronos::Event *slotToMove = this->eventSlot(i + 1);
 
 			if (emptySlot && slotToMove)
-			{				
+			{
 				*emptySlot = *slotToMove;
 				emptySlot->setId(i);
 				slotToMove->reset();
@@ -93,6 +95,8 @@ bool Calendar::remove(EventID evId)
 	}
 	// no matter what, we now have one less...
 	num_events--;
+	if (isRecurring)
+		num_recurring--;
 
 	return foundIt;
 }
