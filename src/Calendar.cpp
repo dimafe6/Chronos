@@ -84,8 +84,9 @@ bool Calendar::remove(EventID evId)
 			Chronos::Event *slotToMove = this->eventSlot(i + 1);
 
 			if (emptySlot && slotToMove)
-			{
+			{				
 				*emptySlot = *slotToMove;
+				emptySlot->setId(i);
 				slotToMove->reset();
 			}
 		}

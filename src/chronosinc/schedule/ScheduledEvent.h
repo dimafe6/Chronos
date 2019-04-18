@@ -213,6 +213,8 @@ public:
 	 */
 	EventID id() const { return event_id;}
 
+	void setId(EventID id) {event_id = id;}
+
 	/*
 	 * isRecurring()
 	 *
