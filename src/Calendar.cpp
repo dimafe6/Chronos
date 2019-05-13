@@ -204,7 +204,7 @@ bool Calendar::add(Chronos::Event &&event)
 }
 #endif
 
-uint8_t Calendar::listNext(uint8_t number, Event::Occurrence into[], const DateTime &dt)
+uint8_t Calendar::listNext(uint8_t number, uint8_t numberRecurring, Event::Occurrence into[], const DateTime &dt)
 {
 	uint8_t ev = 0;
 	uint8_t addedIdx = 0;
@@ -230,7 +230,7 @@ uint8_t Calendar::listNext(uint8_t number, Event::Occurrence into[], const DateT
 			continue;
 		}
 
-		uint8_t maxNumToAdd = evt->isRecurring() ? number : 1;
+		uint8_t maxNumToAdd = evt->isRecurring() ? numberRecurring : 1;
 		bool didInsert = false;
 
 		DateTime recStartDt(dt);
@@ -311,7 +311,7 @@ bool Calendar::nextDateTimeOfInterest(const DateTime &fromDT, DateTime &returnDT
 		}
 	}
 
-	uint8_t numNext = listNext(max_events, eventOccs, fromDT);
+	uint8_t numNext = listNext(max_events, max_events, eventOccs, fromDT);
 
 	for (uint8_t i = 0; i < numNext; i++)
 	{
@@ -430,7 +430,7 @@ uint8_t Calendar::listForDay(uint8_t maxNumber, Event::Occurrence intoArray[], c
 	}
 	*/
 
-	uint8_t numNext = listNext(maxNumber, intoArray, justBeforeDayStart);
+	uint8_t numNext = listNext(maxNumber, maxNumber, intoArray, justBeforeDayStart);
 	uint8_t numFound = 0;
 	for (uint8_t i = 0; i < numNext; i++)
 	{

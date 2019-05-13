@@ -148,7 +148,7 @@ public:
 	 *
 	 * @note: At return, Occurrences [0, returnValue] will be set in intoArray, and sorted by start DateTime
 	 */
-	uint8_t listNext(uint8_t maxNumber, Event::Occurrence intoArray[], const DateTime & dt);
+	uint8_t listNext(uint8_t maxNumber, uint8_t numberRecurring, Event::Occurrence intoArray[], const DateTime & dt);
 
 	/*
 	 * listForDay -- list all events that will begin on the day specified in dt.
