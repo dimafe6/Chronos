@@ -231,6 +231,10 @@ public:
 
 	void setEnabled(bool enabled) { is_enabled = enabled; }
 
+	void setSkipUntilDate(DateTime skipDate) { skipUntilDate = skipDate; }
+	
+	DateTime getSkipUntilDate() { return skipUntilDate; }
+
 	/*
 	 * getZones()
 	 * @return Chronos::Zones struct
@@ -288,6 +292,7 @@ private:
 	DateTime dt_end;
 	Chronos::Zones zones;
 	bool is_enabled = true;
+	DateTime skipUntilDate;
 };
 
 } /* namespace Chronos */

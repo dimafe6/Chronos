@@ -92,6 +92,10 @@ public:
 
 	bool isEnabled(EventID evId);
 
+	void skipEvent(EventID evId, DateTime untillTime);
+
+	DateTime closestFinish(EventID evId);
+
 	/*
 	 * remove -- remove an all events from the calendar by event id
 	 * @param eventId: the EventID to search for

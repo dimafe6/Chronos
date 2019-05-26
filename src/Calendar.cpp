@@ -119,6 +119,38 @@ void Calendar::setEnabled(EventID evId, bool enabled)
 	}
 }
 
+void Calendar::skipEvent(EventID evId, DateTime untilTime)
+{
+	uint8_t pos;
+
+	if (evId <= EVENTID_NOTSET)
+		return;
+
+	for (pos = 0; pos < num_events; pos++)
+	{
+		Chronos::Event *evt = this->eventSlot(pos);
+		if (evt && evt->id() == evId)
+		{
+			evt->setSkipUntilDate(untilTime);
+			break;
+		}
+	}
+}
+
+DateTime Calendar::closestFinish(EventID evId)
+{
+	uint8_t pos;
+
+	if (evId > EVENTID_NOTSET)
+	{
+		for (pos = 0; pos < num_events; pos++)
+		{
+			Chronos::Event *evt = this->eventSlot(pos);
+			return (evt->closestOccurrence(Chronos::DateTime::now())).finish;
+		}
+	}
+}
+
 bool Calendar::isEnabled(EventID evId)
 {
 	uint8_t pos;
@@ -225,7 +257,7 @@ uint8_t Calendar::listNext(uint8_t number, uint8_t numberRecurring, Event::Occur
 		if (NULL == evt)
 			continue;
 
-		if (!evt->hasNext(dt))
+		if (!evt->hasNext(dt) && evt->getSkipUntilDate() < dt)
 		{
 			continue;
 		}

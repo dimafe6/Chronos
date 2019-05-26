@@ -236,6 +236,10 @@ bool Event::hasNext(const DateTime & fromDateTime) {
 		return false;
 	}
 
+	if(skipUntilDate.year() > 1970 && fromDateTime <= skipUntilDate) {
+		return false;
+	}
+
 	if (! is_recurring)
 	{
 		// a one time event
@@ -282,7 +286,6 @@ Event::Occurrence Event::nextOccurrence(const DateTime & fromDateTime) {
 	DateTime nextStart(t_event->next(fromDateTime));
 	DateTime nextEnd(nextStart + duration);
 
-
 	bool ongoing = false;
 	if (nextStart <= fromDateTime && nextEnd > fromDateTime)
 		ongoing = true;
@@ -309,6 +312,10 @@ Event::Occurrence Event::closestOccurrence(const DateTime & fromDateTime)
 
 	DateTime prevStart(t_event->previous(fromDateTime));
 	DateTime prevEnd(prevStart + duration);
+
+	if(skipUntilDate.year() > 1970 && prevStart <= skipUntilDate) {
+		return Event::Occurrence();
+	}
 
 	// maybe we're *in* prev occurrence
 	if (prevEnd > fromDateTime)
