@@ -41,14 +41,6 @@
 
 namespace Chronos {
 
-typedef struct Zones
-{
-  bool zone1 = false;
-  bool zone2 = false;
-  bool zone3 = false;
-  bool zone4 = false;
-};
-
 typedef int8_t EventID;
 
 
@@ -92,12 +84,12 @@ public:
 		DateTime start;
 		DateTime finish;
 		bool isOngoing;
-		Chronos::Zones zones;
+		bool * channels;
 
-		Occurrence(EventID evId, const DateTime & begin, const DateTime & end, const Chronos::Zones & _zones, bool ongoing=false) :
+		Occurrence(EventID evId, const DateTime & begin, const DateTime & end, bool * _channels, bool ongoing=false) :
 			id(evId), start(begin), finish(end), isOngoing(ongoing)
 		{
-			zones = _zones;
+			channels = _channels;
 		}
 		Occurrence() : id(-1), isOngoing(false)
 		{
@@ -111,7 +103,7 @@ public:
 			start(std::move(other.start)),
 			finish(std::move(other.finish)),
 			isOngoing(other.isOngoing),
-			zones(other.zones)
+			channels(other.channels)
 		{
 
 		}
@@ -121,7 +113,7 @@ public:
 			start = std::move(other.start);
 			finish = std::move(other.finish);
 			isOngoing = other.isOngoing;
-			zones = other.zones;
+			channels = other.channels;
 			return *this;
 		}
 
@@ -160,7 +152,7 @@ public:
 	 * @param start: DateTime at which event begins
 	 * @param end: DateTime at which event ends
 	 */
-	Event(Chronos::EventID id, const DateTime & start, const DateTime & end, const Chronos::Zones & _zones, bool enabled = true);
+	Event(Chronos::EventID id, const DateTime & start, const DateTime & end, bool * _channels, bool enabled = true);
 
 	/*
 	 * Chronos::Event(id, start, duration)
@@ -170,7 +162,7 @@ public:
 	 * @param duration: a Chronos::Span to set how long it lasts, e.g. Chronos::Span::Minutes(30)
 	 *
 	 */
-	Event(EventID id, const DateTime & start, const Chronos::Span::Delta & duration, const Chronos::Zones & _zones, bool enabled = true);
+	Event(EventID id, const DateTime & start, const Chronos::Span::Delta & duration, bool * _channels, bool enabled = true);
 
 	/*
 	 * Chronos::Event(id, mark, duration)
@@ -179,12 +171,12 @@ public:
 	 * @param mark: a time mark for the event start, e.g. Chronos::Mark::Weekly(Chronos::Weekday::Monday)
 	 * @parma duration: a Chronos::Span to set how long it lasts, e.g. Chronos::Span::Hours(2)
 	 */
-	Event(EventID id, const Chronos::Mark::Event & timeEvent, const Chronos::Span::Delta & duration, const Chronos::Zones & _zones, bool enabled = true);
+	Event(EventID id, const Chronos::Mark::Event & timeEvent, const Chronos::Span::Delta & duration, bool * _channels, bool enabled = true);
 
 #ifdef PLATFORM_SUPPORTS_RVAL_MOVE
-	Event(EventID id, const Chronos::Mark::Event & timeEvent, Chronos::Span::Delta && duration, const Chronos::Zones && _zones, bool enabled = true);
-	Event(Chronos::EventID id, DateTime && start, DateTime && end, const Chronos::Zones & _zones, bool enabled = true);
-	Event(EventID id, DateTime && start, Chronos::Span::Delta && duration, const Chronos::Zones & _zones, bool enabled = true);
+	Event(EventID id, const Chronos::Mark::Event & timeEvent, Chronos::Span::Delta && duration, bool * _channels, bool enabled = true);
+	Event(Chronos::EventID id, DateTime && start, DateTime && end, bool * _channels, bool enabled = true);
+	Event(EventID id, DateTime && start, Chronos::Span::Delta && duration, bool * _channels, bool enabled = true);
 
 	Event(Event&& rhs);
 	Event & operator=(Event&& rhs);
@@ -236,12 +228,6 @@ public:
 	DateTime getSkipUntilDate() { return skipUntilDate; }
 
 	/*
-	 * getZones()
-	 * @return Chronos::Zones struct
-	 */
-	Chronos::Zones getZones() const { return zones; }
-
-	/*
 	 * hasNext(dt)
 	 *
 	 * @param dt: a DateTime
@@ -290,7 +276,7 @@ private:
 	Chronos::Span::Delta duration;
 	DateTime dt_start;
 	DateTime dt_end;
-	Chronos::Zones zones;
+	bool * channels;
 	bool is_enabled = true;
 	DateTime skipUntilDate;
 };
