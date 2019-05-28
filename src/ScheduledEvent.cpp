@@ -45,10 +45,10 @@ Event::Event(EventID evId, const Chronos::Mark::Event & timeEvent, const Chronos
 		is_recurring(true),
 		t_event(NULL),
 		duration(evtDuration),
-		channels(_channels),
 		is_enabled(enabled)
 {
 	t_event = timeEvent.clone();
+	setChannels(_channels);
 }
 
 
@@ -60,10 +60,9 @@ Event::Event(EventID evId, const DateTime& start, const DateTime& end,  bool * _
 		duration(0),
 		dt_start(start),
 		dt_end(end),
-		channels(_channels),
 		is_enabled(enabled)
 {
-
+	setChannels(_channels);
 }
 
 Event::Event(EventID evId, const DateTime& start, const Chronos::Span::Delta& evtDuration, bool * _channels, bool enabled) :
@@ -73,10 +72,9 @@ Event::Event(EventID evId, const DateTime& start, const Chronos::Span::Delta& ev
 		duration(evtDuration),
 		dt_start(start),
 		dt_end(start + evtDuration),
-		channels(_channels),
 		is_enabled(enabled)
 {
-
+	setChannels(_channels);
 }
 
 #ifdef PLATFORM_SUPPORTS_RVAL_MOVE
@@ -84,10 +82,10 @@ Event::Event(EventID evId, const Chronos::Mark::Event & timeEvent, Chronos::Span
 				event_id(evId),
 				is_recurring(true),
 				duration(std::move(evtDuration)),
-				channels(_channels),
 				is_enabled(enabled)
 {
 		t_event = timeEvent.clone();
+		setChannels(_channels);
 }
 Event::Event(Chronos::EventID evId, DateTime && start, DateTime && end, bool * _channels, bool enabled) :
 	event_id(evId),
@@ -96,9 +94,9 @@ Event::Event(Chronos::EventID evId, DateTime && start, DateTime && end, bool * _
 	duration(0),
 	dt_start(std::move(start)),
 	dt_end(std::move(end)),
-	channels(_channels),
 	is_enabled(enabled)
 {
+	setChannels(_channels);
 }
 Event::Event(EventID evId, DateTime && start, Chronos::Span::Delta && evtDuration, bool * _channels, bool enabled) :
 	event_id(evId),
@@ -107,11 +105,9 @@ Event::Event(EventID evId, DateTime && start, Chronos::Span::Delta && evtDuratio
 	duration(std::move(evtDuration)),
 	dt_start(std::move(start)),
 	dt_end(std::move(start + duration)),
-	channels(_channels),
 	is_enabled(enabled)
 {
-
-
+	setChannels(_channels);
 }
 
 
@@ -122,13 +118,11 @@ Event::Event(Event&& other) :
 		duration(std::move(other.duration)),
 		dt_start(std::move(other.dt_start)),
 		dt_end(std::move(other.dt_end)),
-		channels(std::move(other.channels)),
 		is_enabled(std::move(other.is_enabled))
 {
 	// we've taken ownership of the rvalue's event pointer
 	other.t_event = NULL;  // prevent it from being released in rvalue's d'tor
-
-
+	setChannels(other.channels);
 }
 Event & Event::operator=(Event&& other)
 {
@@ -167,13 +161,13 @@ Event::Event(const Event & other) :
 		duration(other.duration),
 		dt_start(other.dt_start),
 		dt_end(other.dt_end),
-		channels(other.channels),
 		is_enabled(other.is_enabled)
 {
 	if (NULL != other.t_event)
 	{
 		t_event = other.t_event->clone();
 	}
+	setChannels(other.channels);
 }
 
 
@@ -184,7 +178,7 @@ Event & Event::operator=(const Event & other)
 	duration = other.duration;
 	dt_start = other.dt_start;
 	dt_end = other.dt_end;
-	channels = other.channels;
+	setChannels(other.channels);
 	is_enabled = other.is_enabled;
 
 	/* ???
@@ -335,6 +329,12 @@ Event::Occurrence Event::closestOccurrence(const DateTime & fromDateTime)
 
 }
 
+void Event::setChannels(const bool* _channels) {
+	for (int i=0; i<CHANNELS_COUNT; i++) 
+	{
+		channels[i] = _channels[i];
+	}
+}
 
 } /* namespace Chronos */
 

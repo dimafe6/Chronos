@@ -243,7 +243,7 @@ uint8_t Calendar::listNext(uint8_t number, uint8_t numberRecurring, Event::Occur
 
 	{
 		Chronos::DateTime farFuture(Chronos::DateTime::endOfTime());
-		bool * defaultChannels;
+		bool defaultChannels[CHANNELS_COUNT] = {false};
 		Event::Occurrence dummy(EVENTID_NOTSET, farFuture, farFuture, defaultChannels);
 		for (uint8_t i = 0; i < number; i++)
 			into[i] = dummy;

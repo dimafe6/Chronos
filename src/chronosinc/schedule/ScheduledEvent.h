@@ -84,12 +84,15 @@ public:
 		DateTime start;
 		DateTime finish;
 		bool isOngoing;
-		bool * channels;
+		bool channels[CHANNELS_COUNT] = {false};
 
 		Occurrence(EventID evId, const DateTime & begin, const DateTime & end, bool * _channels, bool ongoing=false) :
 			id(evId), start(begin), finish(end), isOngoing(ongoing)
 		{
-			channels = _channels;
+			for (int i=0; i<CHANNELS_COUNT; i++) 
+			{
+				channels[i] = _channels[i];
+			}
 		}
 		Occurrence() : id(-1), isOngoing(false)
 		{
@@ -102,10 +105,9 @@ public:
 			id(other.id),
 			start(std::move(other.start)),
 			finish(std::move(other.finish)),
-			isOngoing(other.isOngoing),
-			channels(other.channels)
+			isOngoing(other.isOngoing)
 		{
-
+			setChannels(other.channels);
 		}
 		Occurrence & operator=(Occurrence&& other)
 		{
@@ -113,7 +115,7 @@ public:
 			start = std::move(other.start);
 			finish = std::move(other.finish);
 			isOngoing = other.isOngoing;
-			channels = other.channels;
+			setChannels(other.channels);
 			return *this;
 		}
 
@@ -127,8 +129,6 @@ public:
 		{
 			return (start <= other.start);
 		}
-
-
 	};
 
 
@@ -276,9 +276,10 @@ private:
 	Chronos::Span::Delta duration;
 	DateTime dt_start;
 	DateTime dt_end;
-	bool * channels;
+	bool channels[CHANNELS_COUNT] = {false};	
 	bool is_enabled = true;
 	DateTime skipUntilDate;
+	void setChannels(const bool* _channels);
 };
 
 } /* namespace Chronos */
