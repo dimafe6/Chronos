@@ -251,6 +251,33 @@ bool Event::hasNext(const DateTime & fromDateTime) {
 	return true;
 
 }
+
+bool Event::isOverdue(const DateTime & fromDateTime) {
+
+	if(!is_enabled) {
+		return false;
+	}
+
+	if(skipUntilDate.year() > 1970 && fromDateTime <= skipUntilDate) {
+		return true;
+	}
+
+	if (!is_recurring)
+	{
+		// a one time event
+		if (fromDateTime >= dt_end)
+		{
+			// is overdue
+			return true;
+		}
+
+		return true;
+	}
+
+	// it is a recurring event... it must therefore have a next
+	return true;
+}
+
 Event::Occurrence Event::nextOccurrence(const DateTime & fromDateTime) {
 
 	if(!is_enabled) {

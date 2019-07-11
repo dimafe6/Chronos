@@ -236,6 +236,8 @@ public:
 	 */
 	bool hasNext(const DateTime & fromDateTime);
 
+	bool isOverdue(const DateTime & fromDateTime);
+
 	/*
 	 * nextOccurrence(dt)
 	 *

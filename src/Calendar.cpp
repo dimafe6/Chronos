@@ -171,6 +171,28 @@ bool Calendar::isEnabled(EventID evId)
 	return false;
 }
 
+bool Calendar::isOverdue(EventID evId)
+{
+	uint8_t pos;
+
+	if (evId <= EVENTID_NOTSET)
+		return false;
+
+	Chronos::DateTime now = Chronos::DateTime::now();
+
+	for (pos = 0; pos < num_events; pos++)
+	{
+		Chronos::Event *evt = this->eventSlot(pos);
+		if (evt && evt->id() == evId)
+		{
+			return evt->isOverdue(now); 
+			break;
+		}
+	}
+
+	return false;
+}
+
 void Calendar::removeAll(EventID evId)
 {
 	bool foundIt = true;

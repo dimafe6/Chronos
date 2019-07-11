@@ -92,6 +92,8 @@ public:
 
 	bool isEnabled(EventID evId);
 
+	bool isOverdue(EventID evId);
+
 	void skipEvent(EventID evId, DateTime untillTime);
 
 	DateTime closestFinish(EventID evId);
