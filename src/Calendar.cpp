@@ -146,7 +146,11 @@ DateTime Calendar::closestFinish(EventID evId)
 		for (pos = 0; pos < num_events; pos++)
 		{
 			Chronos::Event *evt = this->eventSlot(pos);
-			return (evt->closestOccurrence(Chronos::DateTime::now())).finish;
+			if(evt->isRecurring()) {
+				return (evt->closestOccurrence(Chronos::DateTime::now())).finish;
+			} else {
+				return Chronos::DateTime::now();
+			}
 		}
 	}
 }
@@ -178,7 +182,8 @@ bool Calendar::isOverdue(EventID evId)
 	if (evId <= EVENTID_NOTSET)
 		return false;
 
-	Chronos::DateTime now = Chronos::DateTime::now();
+	//Check next second from now
+	Chronos::DateTime now = Chronos::DateTime::now() + Chronos::Span::Seconds(1);
 
 	for (pos = 0; pos < num_events; pos++)
 	{

@@ -258,24 +258,14 @@ bool Event::isOverdue(const DateTime & fromDateTime) {
 		return false;
 	}
 
-	if(skipUntilDate.year() > 1970 && fromDateTime <= skipUntilDate) {
-		return true;
-	}
-
 	if (!is_recurring)
 	{
-		// a one time event
-		if (fromDateTime >= dt_end)
-		{
-			// is overdue
-			return true;
-		}
-
-		return true;
+		// is overdue
+		return (fromDateTime >= dt_end) || (skipUntilDate.year() > 1970 && fromDateTime <= skipUntilDate);
 	}
 
 	// it is a recurring event... it must therefore have a next
-	return true;
+	return false;
 }
 
 Event::Occurrence Event::nextOccurrence(const DateTime & fromDateTime) {
