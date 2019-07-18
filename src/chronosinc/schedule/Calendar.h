@@ -96,6 +96,8 @@ public:
 
 	void skipEvent(EventID evId, DateTime untillTime);
 
+	bool isRecurring(EventID evId);
+
 	DateTime closestFinish(EventID evId);
 
 	/*

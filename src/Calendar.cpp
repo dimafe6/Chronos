@@ -146,11 +146,7 @@ DateTime Calendar::closestFinish(EventID evId)
 		for (pos = 0; pos < num_events; pos++)
 		{
 			Chronos::Event *evt = this->eventSlot(pos);
-			if(evt->isRecurring()) {
-				return (evt->closestOccurrence(Chronos::DateTime::now())).finish;
-			} else {
-				return Chronos::DateTime::now();
-			}
+			return (evt->closestOccurrence(Chronos::DateTime::now())).finish;
 		}
 	}
 }
@@ -168,6 +164,25 @@ bool Calendar::isEnabled(EventID evId)
 		if (evt && evt->id() == evId)
 		{
 			return evt->isEnabled();
+			break;
+		}
+	}
+
+	return false;
+}
+
+bool Calendar::isRecurring(EventID evId) {
+	uint8_t pos;
+
+	if (evId <= EVENTID_NOTSET)
+		return false;
+
+	for (pos = 0; pos < num_events; pos++)
+	{
+		Chronos::Event *evt = this->eventSlot(pos);
+		if (evt && evt->id() == evId)
+		{
+			return evt->isRecurring();
 			break;
 		}
 	}

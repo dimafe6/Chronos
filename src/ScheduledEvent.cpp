@@ -261,7 +261,7 @@ bool Event::isOverdue(const DateTime & fromDateTime) {
 	if (!is_recurring)
 	{
 		// is overdue
-		return (fromDateTime >= dt_end) || (skipUntilDate.year() > 1970 && fromDateTime <= skipUntilDate);
+		return fromDateTime >= dt_end;
 	}
 
 	// it is a recurring event... it must therefore have a next
