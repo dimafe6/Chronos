@@ -23,108 +23,131 @@
  *    along with Chronos.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "chronosinc/schedule/ScheduledEvent.h"
 #include "chronosinc/marks/marks.h"
 #include "chronosinc/platform/platform.h"
 
-namespace Chronos {
-
-
-// int Event::schedev_counter = 0;
-Event::Event() : event_id(EVENTID_NOTSET),
-is_recurring(false),
-t_event(NULL),
-duration(0)
+namespace Chronos
 {
-
+Event::Event() : event_id(EVENTID_NOTSET),
+				 is_recurring(false),
+				 t_event(NULL),
+				 duration(0),
+				 is_task(false)
+{
 }
 
-Event::Event(EventID evId, const Chronos::Mark::Event & timeEvent, const Chronos::Span::Delta & evtDuration, bool * _channels, bool enabled):
-		event_id(evId),
-		is_recurring(true),
-		t_event(NULL),
-		duration(evtDuration),
-		is_enabled(enabled)
+Event::Event(
+	EventID evId,
+	const Chronos::Mark::Event &timeEvent,
+	const Chronos::Span::Delta &evtDuration,
+	bool *_channels,
+	bool enabled,
+	bool is_task) : event_id(evId),
+						   is_recurring(true),
+						   t_event(NULL),
+						   duration(evtDuration),
+						   is_enabled(enabled),
+						   is_task(is_task)
 {
 	t_event = timeEvent.clone();
 	setChannels(_channels);
 }
 
-
-
-Event::Event(EventID evId, const DateTime& start, const DateTime& end,  bool * _channels, bool enabled) :
-		event_id(evId),
-		is_recurring(false),
-		t_event(NULL),
-		duration(0),
-		dt_start(start),
-		dt_end(end),
-		is_enabled(enabled)
+Event::Event(
+	EventID evId,
+	const DateTime &start,
+	const DateTime &end,
+	bool *_channels,
+	bool enabled,
+	bool is_task) : event_id(evId),
+						   is_recurring(false),
+						   t_event(NULL),
+						   duration(0),
+						   dt_start(start),
+						   dt_end(end),
+						   is_enabled(enabled),
+						   is_task(is_task)
 {
 	setChannels(_channels);
 }
 
-Event::Event(EventID evId, const DateTime& start, const Chronos::Span::Delta& evtDuration, bool * _channels, bool enabled) :
-		event_id(evId),
-		is_recurring(false),
-		t_event(NULL),
-		duration(evtDuration),
-		dt_start(start),
-		dt_end(start + evtDuration),
-		is_enabled(enabled)
+Event::Event(
+	EventID evId,
+	const DateTime &start,
+	const Chronos::Span::Delta &evtDuration,
+	bool *_channels,
+	bool enabled,
+	bool is_task) : event_id(evId),
+						   is_recurring(false),
+						   t_event(NULL),
+						   duration(evtDuration),
+						   dt_start(start),
+						   dt_end(start + evtDuration),
+						   is_enabled(enabled),
+						   is_task(is_task)
 {
 	setChannels(_channels);
 }
 
 #ifdef PLATFORM_SUPPORTS_RVAL_MOVE
-Event::Event(EventID evId, const Chronos::Mark::Event & timeEvent, Chronos::Span::Delta && evtDuration,  bool * _channels, bool enabled) :
-				event_id(evId),
-				is_recurring(true),
-				duration(std::move(evtDuration)),
-				is_enabled(enabled)
+Event::Event(
+	EventID evId,
+	const Chronos::Mark::Event &timeEvent,
+	Chronos::Span::Delta &&evtDuration,
+	bool *_channels,
+	bool enabled) : event_id(evId),
+					is_recurring(true),
+					duration(std::move(evtDuration)),
+					is_enabled(enabled)
 {
-		t_event = timeEvent.clone();
-		setChannels(_channels);
+	t_event = timeEvent.clone();
+	setChannels(_channels);
 }
-Event::Event(Chronos::EventID evId, DateTime && start, DateTime && end, bool * _channels, bool enabled) :
-	event_id(evId),
-	is_recurring(false),
-	t_event(NULL),
-	duration(0),
-	dt_start(std::move(start)),
-	dt_end(std::move(end)),
-	is_enabled(enabled)
+Event::Event(
+	Chronos::EventID evId,
+	DateTime &&start,
+	DateTime &&end,
+	bool *_channels,
+	bool enabled) : event_id(evId),
+					is_recurring(false),
+					t_event(NULL),
+					duration(0),
+					dt_start(std::move(start)),
+					dt_end(std::move(end)),
+					is_enabled(enabled)
 {
 	setChannels(_channels);
 }
-Event::Event(EventID evId, DateTime && start, Chronos::Span::Delta && evtDuration, bool * _channels, bool enabled) :
-	event_id(evId),
-	is_recurring(false),
-	t_event(NULL),
-	duration(std::move(evtDuration)),
-	dt_start(std::move(start)),
-	dt_end(std::move(start + duration)),
-	is_enabled(enabled)
+Event::Event(
+	EventID evId,
+	DateTime &&start,
+	Chronos::Span::Delta &&evtDuration,
+	bool *_channels,
+	bool enabled) : event_id(evId),
+					is_recurring(false),
+					t_event(NULL),
+					duration(std::move(evtDuration)),
+					dt_start(std::move(start)),
+					dt_end(std::move(start + duration)),
+					is_enabled(enabled)
 {
 	setChannels(_channels);
 }
 
-
-Event::Event(Event&& other) :
-		event_id(other.event_id),
-		is_recurring(other.is_recurring),
-		t_event(other.t_event),
-		duration(std::move(other.duration)),
-		dt_start(std::move(other.dt_start)),
-		dt_end(std::move(other.dt_end)),
-		is_enabled(std::move(other.is_enabled))
+Event::Event(Event &&other) : event_id(other.event_id),
+							  is_recurring(other.is_recurring),
+							  t_event(other.t_event),
+							  duration(std::move(other.duration)),
+							  dt_start(std::move(other.dt_start)),
+							  dt_end(std::move(other.dt_end)),
+							  is_enabled(std::move(other.is_enabled))
 {
 	// we've taken ownership of the rvalue's event pointer
-	other.t_event = NULL;  // prevent it from being released in rvalue's d'tor
+	other.t_event = NULL; // prevent it from being released in rvalue's d'tor
 	setChannels(other.channels);
 }
-Event & Event::operator=(Event&& other)
+Event &Event::operator=(Event &&other)
 {
 	event_id = other.event_id;
 	is_recurring = other.is_recurring;
@@ -143,8 +166,9 @@ Event & Event::operator=(Event&& other)
 		// take ownership of the rvalue's event pointer
 		t_event = other.t_event;
 		other.t_event = NULL; // prevent it from being released in d'tor
-
-	} else {
+	}
+	else
+	{
 		t_event = NULL;
 	}
 
@@ -153,15 +177,14 @@ Event & Event::operator=(Event&& other)
 
 #endif
 
-
-Event::Event(const Event & other) :
-		event_id(other.event_id),
-		is_recurring(other.is_recurring),
-		t_event(NULL),
-		duration(other.duration),
-		dt_start(other.dt_start),
-		dt_end(other.dt_end),
-		is_enabled(other.is_enabled)
+Event::Event(const Event &other) : event_id(other.event_id),
+								   is_recurring(other.is_recurring),
+								   t_event(NULL),
+								   duration(other.duration),
+								   dt_start(other.dt_start),
+								   dt_end(other.dt_end),
+								   is_enabled(other.is_enabled),
+								   is_task(other.is_task)
 {
 	if (NULL != other.t_event)
 	{
@@ -170,8 +193,7 @@ Event::Event(const Event & other) :
 	setChannels(other.channels);
 }
 
-
-Event & Event::operator=(const Event & other)
+Event &Event::operator=(const Event &other)
 {
 	event_id = other.event_id;
 	is_recurring = other.is_recurring;
@@ -180,13 +202,7 @@ Event & Event::operator=(const Event & other)
 	dt_end = other.dt_end;
 	setChannels(other.channels);
 	is_enabled = other.is_enabled;
-
-	/* ???
-	if (NULL != t_event)
-	{
-
-	}
-	*/
+	is_task = other.is_task;
 
 	if (t_event)
 	{
@@ -196,8 +212,9 @@ Event & Event::operator=(const Event & other)
 	if (other.t_event)
 	{
 		t_event = other.t_event->clone();
-
-	} else {
+	}
+	else
+	{
 		t_event = NULL;
 	}
 
@@ -207,7 +224,6 @@ Event::~Event()
 {
 	// schedev_counter--;
 	reset();
-
 }
 
 void Event::reset()
@@ -219,42 +235,39 @@ void Event::reset()
 		delete t_event;
 		t_event = NULL;
 	}
-
-
 }
 
-bool Event::hasNext(const DateTime & fromDateTime) {
-
-	if(!is_enabled) {
+bool Event::hasNext(const DateTime &fromDateTime)
+{
+	if (!is_enabled)
+	{
 		return false;
 	}
 
-	if(skipUntilDate.year() > 1970 && fromDateTime <= skipUntilDate) {
+	if (skipUntilDate.year() > 1970 && fromDateTime <= skipUntilDate)
+	{
 		return false;
 	}
 
-	if (! is_recurring)
+	if (!is_recurring)
 	{
 		// a one time event
-
 		if (fromDateTime >= dt_start)
 		{
 			// too late.
 			return false;
 		}
-
 		return true;
-
 	}
 
 	// it is a recurring event... it must therefore have a next
 	return true;
-
 }
 
-bool Event::isOverdue(const DateTime & fromDateTime) {
-
-	if(!is_enabled) {
+bool Event::isOverdue(const DateTime &fromDateTime)
+{
+	if (!is_enabled)
+	{
 		return false;
 	}
 
@@ -268,16 +281,16 @@ bool Event::isOverdue(const DateTime & fromDateTime) {
 	return false;
 }
 
-Event::Occurrence Event::nextOccurrence(const DateTime & fromDateTime) {
-
-	if(!is_enabled) {
+Event::Occurrence Event::nextOccurrence(const DateTime &fromDateTime)
+{
+	if (!is_enabled)
+	{
 		return Event::Occurrence();
 	}
-	
-	if (! is_recurring)
-	{
-			// a one time event
 
+	if (!is_recurring)
+	{
+		// a one time event
 		if (fromDateTime >= dt_start)
 		{
 			// too late.
@@ -285,11 +298,10 @@ Event::Occurrence Event::nextOccurrence(const DateTime & fromDateTime) {
 		}
 
 		// it starts in the future... yay
-		return Event::Occurrence(event_id, dt_start, dt_end, channels, false);
-
+		return Event::Occurrence(event_id, dt_start, dt_end, channels, false, is_task);
 	}
 
-	if (! t_event)
+	if (!t_event)
 		return Event::Occurrence();
 
 	// it is a recurring event...
@@ -300,30 +312,29 @@ Event::Occurrence Event::nextOccurrence(const DateTime & fromDateTime) {
 	if (nextStart <= fromDateTime && nextEnd > fromDateTime)
 		ongoing = true;
 
-	return Event::Occurrence(event_id, nextStart, nextEnd, channels, ongoing);
-
-
+	return Event::Occurrence(event_id, nextStart, nextEnd, channels, ongoing, is_task);
 }
-Event::Occurrence Event::closestOccurrence(const DateTime & fromDateTime)
+Event::Occurrence Event::closestOccurrence(const DateTime &fromDateTime)
 {
-	if(!is_enabled) {
+	if (!is_enabled)
+	{
 		return Event::Occurrence();
 	}
-	
-	if (! is_recurring)
+
+	if (!is_recurring)
 	{
 		// a one time event, the closest is the only occurrence
-		return Event::Occurrence(event_id, dt_start, dt_end, channels, (dt_start <= fromDateTime && dt_end > fromDateTime));
-
+		return Event::Occurrence(event_id, dt_start, dt_end, channels, (dt_start <= fromDateTime && dt_end > fromDateTime), is_task);
 	}
 
-	if (! t_event)
+	if (!t_event)
 		return Event::Occurrence();
 
 	DateTime prevStart(t_event->previous(fromDateTime));
 	DateTime prevEnd(prevStart + duration);
 
-	if(skipUntilDate.year() > 1970 && prevStart <= skipUntilDate) {
+	if (skipUntilDate.year() > 1970 && prevStart <= skipUntilDate)
+	{
 		return Event::Occurrence();
 	}
 
@@ -331,27 +342,24 @@ Event::Occurrence Event::closestOccurrence(const DateTime & fromDateTime)
 	if (prevEnd > fromDateTime)
 	{
 		// yep
-		return  Event::Occurrence(event_id, prevStart, prevEnd, channels, true);
+		return Event::Occurrence(event_id, prevStart, prevEnd, channels, true, is_task);
 	}
 
 	DateTime justAfterPrevEnd(prevEnd + Chronos::Span::Seconds(1));
-
 
 	// nope... see the next one
 	DateTime nextStart(t_event->next(justAfterPrevEnd));
 	DateTime nextEnd(nextStart + duration);
 
-	return Event::Occurrence(event_id, nextStart, nextEnd, channels, (nextStart <= fromDateTime));
-
-
+	return Event::Occurrence(event_id, nextStart, nextEnd, channels, (nextStart <= fromDateTime), is_task);
 }
 
-void Event::setChannels(const bool* _channels) {
-	for (int i=0; i<CHANNELS_COUNT; i++) 
+void Event::setChannels(const bool *_channels)
+{
+	for (int i = 0; i < CHANNELS_COUNT; i++)
 	{
 		channels[i] = _channels[i];
 	}
 }
 
 } /* namespace Chronos */
-
