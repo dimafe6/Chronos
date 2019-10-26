@@ -37,12 +37,12 @@
 #include "../../chronosinc/marks/marks.h"
 #include "../platform/platform.h"
 
-#define EVENTID_NOTSET		-1
+#define EVENTID_NOTSET -1
 
-namespace Chronos {
+namespace Chronos
+{
 
 typedef int8_t EventID;
-
 
 /*
  * Chronos::Event class
@@ -63,9 +63,9 @@ typedef int8_t EventID;
  * takes place.
  *
  */
-class Event {
+class Event
+{
 public:
-
 	/*
 	 * Chronos::Event::Occurrence
 	 *
@@ -76,61 +76,68 @@ public:
 	 * finish:		last DateTime that can be considered as occupied by the event
 	 * isOngoing: 	boolean, true if the event is happening at the time specified in query
 	 */
-
-	class Occurrence {
+	class Occurrence
+	{
 	public:
 		// act like a struct
 		EventID id;
 		DateTime start;
 		DateTime finish;
 		bool isOngoing;
+		bool is_task = false;
 		bool channels[CHANNELS_COUNT] = {false};
 
-		Occurrence(EventID evId, const DateTime & begin, const DateTime & end, bool * _channels, bool ongoing=false) :
-			id(evId), start(begin), finish(end), isOngoing(ongoing)
+		Occurrence(EventID evId,
+				   const DateTime &begin,
+				   const DateTime &end,
+				   bool *_channels,
+				   bool ongoing = false,
+				   bool is_task = false) : id(evId),
+										   start(begin),
+										   finish(end),
+										   isOngoing(ongoing),
+										   is_task(is_task)
 		{
-			for (int i=0; i<CHANNELS_COUNT; i++) 
+			for (int i = 0; i < CHANNELS_COUNT; i++)
 			{
 				channels[i] = _channels[i];
 			}
 		}
-		Occurrence() : id(-1), isOngoing(false)
+		Occurrence() : id(-1), isOngoing(false), is_task(false)
 		{
-
 		}
-	#ifdef PLATFORM_SUPPORTS_RVAL_MOVE
+#ifdef PLATFORM_SUPPORTS_RVAL_MOVE
 		Occurrence(const Occurrence &) = default;
-		Occurrence & operator=(const Occurrence &) = default;
-		Occurrence(Occurrence&& other) :
-			id(other.id),
-			start(std::move(other.start)),
-			finish(std::move(other.finish)),
-			isOngoing(other.isOngoing)
+		Occurrence &operator=(const Occurrence &) = default;
+		Occurrence(Occurrence &&other) : id(other.id),
+										 start(std::move(other.start)),
+										 finish(std::move(other.finish)),
+										 isOngoing(other.isOngoing),
+										 is_task(other.is_task)
 		{
-			setChannels(other.channels);
 		}
-		Occurrence & operator=(Occurrence&& other)
+		Occurrence &operator=(Occurrence &&other)
 		{
 			id = other.id;
 			start = std::move(other.start);
 			finish = std::move(other.finish);
 			isOngoing = other.isOngoing;
-			setChannels(other.channels);
+			is_task = other.is_task;
+
 			return *this;
 		}
 
-	#endif
+#endif
 
-		inline bool operator>(const Occurrence & other)
+		inline bool operator>(const Occurrence &other)
 		{
 			return (start > other.start);
 		}
-		inline bool operator<=(const Occurrence & other)
+		inline bool operator<=(const Occurrence &other)
 		{
 			return (start <= other.start);
 		}
 	};
-
 
 	/*
 	 * Chronos::Event constructors.
@@ -152,7 +159,7 @@ public:
 	 * @param start: DateTime at which event begins
 	 * @param end: DateTime at which event ends
 	 */
-	Event(Chronos::EventID id, const DateTime & start, const DateTime & end, bool * _channels, bool enabled = true);
+	Event(Chronos::EventID id, const DateTime &start, const DateTime &end, bool *_channels, bool enabled = true, bool is_task = false);
 
 	/*
 	 * Chronos::Event(id, start, duration)
@@ -162,7 +169,7 @@ public:
 	 * @param duration: a Chronos::Span to set how long it lasts, e.g. Chronos::Span::Minutes(30)
 	 *
 	 */
-	Event(EventID id, const DateTime & start, const Chronos::Span::Delta & duration, bool * _channels, bool enabled = true);
+	Event(EventID id, const DateTime &start, const Chronos::Span::Delta &duration, bool *_channels, bool enabled = true, bool is_task = false);
 
 	/*
 	 * Chronos::Event(id, mark, duration)
@@ -171,21 +178,20 @@ public:
 	 * @param mark: a time mark for the event start, e.g. Chronos::Mark::Weekly(Chronos::Weekday::Monday)
 	 * @parma duration: a Chronos::Span to set how long it lasts, e.g. Chronos::Span::Hours(2)
 	 */
-	Event(EventID id, const Chronos::Mark::Event & timeEvent, const Chronos::Span::Delta & duration, bool * _channels, bool enabled = true);
+	Event(EventID id, const Chronos::Mark::Event &timeEvent, const Chronos::Span::Delta &duration, bool *_channels, bool enabled = true, bool is_task = false);
 
 #ifdef PLATFORM_SUPPORTS_RVAL_MOVE
-	Event(EventID id, const Chronos::Mark::Event & timeEvent, Chronos::Span::Delta && duration, bool * _channels, bool enabled = true);
-	Event(Chronos::EventID id, DateTime && start, DateTime && end, bool * _channels, bool enabled = true);
-	Event(EventID id, DateTime && start, Chronos::Span::Delta && duration, bool * _channels, bool enabled = true);
+	Event(EventID id, const Chronos::Mark::Event &timeEvent, Chronos::Span::Delta &&duration, bool *_channels, bool enabled = true, bool is_task = false);
+	Event(Chronos::EventID id, DateTime &&start, DateTime &&end, bool *_channels, bool enabled = true, bool is_task = false);
+	Event(EventID id, DateTime &&start, Chronos::Span::Delta &&duration, bool *_channels, bool enabled = true, bool is_task = false);
 
-	Event(Event&& rhs);
-	Event & operator=(Event&& rhs);
+	Event(Event &&rhs);
+	Event &operator=(Event &&rhs);
 #endif
 
 	// copy and assignment operator
-	Event(const Event & other);
-	Event & operator=(const Event & other);
-
+	Event(const Event &other);
+	Event &operator=(const Event &other);
 
 	// d'tor
 	~Event();
@@ -203,9 +209,9 @@ public:
 	 *
 	 * @return: EventID specified during construction.
 	 */
-	EventID id() const { return event_id;}
+	EventID id() const { return event_id; }
 
-	void setId(EventID id) {event_id = id;}
+	void setId(EventID id) { event_id = id; }
 
 	/*
 	 * isRecurring()
@@ -221,10 +227,12 @@ public:
 	 */
 	bool isEnabled() const { return is_enabled; }
 
+	bool isTask() const { return is_task; }
+
 	void setEnabled(bool enabled) { is_enabled = enabled; }
 
 	void setSkipUntilDate(DateTime skipDate) { skipUntilDate = skipDate; }
-	
+
 	DateTime getSkipUntilDate() { return skipUntilDate; }
 
 	/*
@@ -234,9 +242,9 @@ public:
 	 * @return: boolean true if there will be an occurrence of the event that starts in the future,
 	 * 	        relative to dt (strictly so the start > dt, not >=).
 	 */
-	bool hasNext(const DateTime & fromDateTime);
+	bool hasNext(const DateTime &fromDateTime);
 
-	bool isOverdue(const DateTime & fromDateTime);
+	bool isOverdue(const DateTime &fromDateTime);
 
 	/*
 	 * nextOccurrence(dt)
@@ -247,7 +255,7 @@ public:
 	 * @note: will always return something valid for repeating events. For one-time events, this only makes sense
 	 * when dt > event.start.
 	 */
-	Event::Occurrence nextOccurrence(const DateTime & fromDateTime);
+	Event::Occurrence nextOccurrence(const DateTime &fromDateTime);
 
 	/*
 	 * closestOccurrence(dt)
@@ -261,8 +269,7 @@ public:
 	 * If the event is happening @ dt, then that's the occurrence that will be returned.
 	 * Otherwise, the next occurrence will be returned, as specified above in nextOccurrence().
 	 */
-	Event::Occurrence closestOccurrence(const DateTime & fromDateTime);
-
+	Event::Occurrence closestOccurrence(const DateTime &fromDateTime);
 
 	/*
 	 * Default constructor.  Needed internally but creates an Event with an invalid
@@ -274,14 +281,15 @@ private:
 	// private, I say!
 	EventID event_id;
 	bool is_recurring;
-	Chronos::Mark::Event * t_event;
+	Chronos::Mark::Event *t_event;
 	Chronos::Span::Delta duration;
 	DateTime dt_start;
 	DateTime dt_end;
-	bool channels[CHANNELS_COUNT] = {false};	
+	bool channels[CHANNELS_COUNT] = {false};
 	bool is_enabled = true;
 	DateTime skipUntilDate;
-	void setChannels(const bool* _channels);
+	bool is_task = false;
+	void setChannels(const bool *_channels);
 };
 
 } /* namespace Chronos */

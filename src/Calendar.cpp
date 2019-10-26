@@ -28,14 +28,12 @@
 #include "chronosinc/Sort.h"
 namespace Chronos
 {
-
 Calendar::Calendar(uint8_t maxEvents) : num_events(0), max_events(maxEvents), num_recurring(0)
 {
 }
 
 void Calendar::clear()
 {
-
 	if (!num_events)
 		return;
 
@@ -171,7 +169,28 @@ bool Calendar::isEnabled(EventID evId)
 	return false;
 }
 
-bool Calendar::isRecurring(EventID evId) {
+bool Calendar::isTask(EventID evId)
+{
+	uint8_t pos;
+
+	if (evId <= EVENTID_NOTSET)
+		return false;
+
+	for (pos = 0; pos < num_events; pos++)
+	{
+		Chronos::Event *evt = this->eventSlot(pos);
+		if (evt && evt->id() == evId)
+		{
+			return evt->isTask();
+			break;
+		}
+	}
+
+	return false;
+}
+
+bool Calendar::isRecurring(EventID evId)
+{
 	uint8_t pos;
 
 	if (evId <= EVENTID_NOTSET)
@@ -205,7 +224,7 @@ bool Calendar::isOverdue(EventID evId)
 		Chronos::Event *evt = this->eventSlot(pos);
 		if (evt && evt->id() == evId)
 		{
-			return evt->isOverdue(now); 
+			return evt->isOverdue(now);
 			break;
 		}
 	}
@@ -400,77 +419,10 @@ bool Calendar::nextDateTimeOfInterest(const DateTime &fromDT, DateTime &returnDT
 
 	delete[] eventOccs;
 	return foundSomething;
-
-#if 0
-
-	Event::Occurrence * ongoingEvents = new Event::Occurrence[max_events];
-	if (! ongoingEvents)
-	{
-		CHRONOS_DEBUG_OUTLN("nextDateTimeOfInterest: Couldn't allocate space for ongoing list?");
-		return false;
-	}
-
-	Event::Occurrence * nextEvents = new Event::Occurrence[max_events];
-	if (! nextEvents)
-	{
-		delete [] ongoingEvents;
-		CHRONOS_DEBUG_OUTLN("nextDateTimeOfInterest: Couldn't allocate space for next list?");
-		return false;
-
-
-	}
-
-
-	uint8_t numOngoing = listOngoing(max_events, ongoingEvents, fromDT);
-	uint8_t numNext = listNext(max_events, nextEvents, fromDT);
-
-	if (! (numNext || numOngoing))
-	{
-		// nothing going on, nothing upcoming...
-		delete [] ongoingEvents;
-		delete [] nextEvents;
-		return false;
-	}
-
-	DateTime * dtOfInterest = new DateTime[numOngoing + numNext];
-	if (! dtOfInterest)
-	{
-		CHRONOS_DEBUG_OUTLN("nextDateTimeOfInterest: Couldn't allocate space for DT list?");
-		delete [] ongoingEvents;
-		delete [] nextEvents;
-		return false;
-
-	}
-
-	uint8_t dtCount = 0;
-	for (uint8_t i=0; i<numOngoing; i++)
-	{
-		// these are on-going, so happening right now... we keep the end datetimes
-		dtOfInterest[dtCount++] = ongoingEvents[i].finish;
-	}
-
-	for (uint8_t i=0; i<numNext; i++)
-	{
-		// there are coming up, we keep the start datetimes which are in the future
-		dtOfInterest[dtCount++] = nextEvents[i].start;
-	}
-
-	// now we sort the list
-	Chronos::Sort::bubble(dtOfInterest, dtCount);
-
-	returnDT = dtOfInterest[0]; // first in list is smallest datetime
-
-	// clear our lists
-	delete [] ongoingEvents;
-	delete [] nextEvents;
-	delete [] dtOfInterest;
-
-	return true;
-#endif
 }
+
 uint8_t Calendar::listOngoing(uint8_t number, Event::Occurrence into[], const DateTime &dt)
 {
-
 	uint8_t ev = 0;
 	uint8_t addedIdx = 0;
 	while (ev < num_events && addedIdx < number)
